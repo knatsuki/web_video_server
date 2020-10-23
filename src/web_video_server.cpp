@@ -52,47 +52,26 @@ WebVideoServer::WebVideoServer(rclcpp::Node::SharedPtr &nh, rclcpp::Node::Shared
     nh_(nh), handler_group_(
         async_web_server_cpp::HttpReply::stock_reply(async_web_server_cpp::HttpReply::not_found))
 {
-  rclcpp::Parameter parameter;
-  if (private_nh->get_parameter("port", parameter)) {
-    port_ = parameter.as_int();
-  } else {
-    port_ = 8080;
-  }
-  if (private_nh->get_parameter("verbose", parameter)) {
-    __verbose = parameter.as_bool();
-  } else {
-    __verbose = true;
-  }
+  private_nh->declare_parameter("port", 8080);
+  port_ = private_nh->get_parameter("port").as_int();
 
-  if (private_nh->get_parameter("address", parameter)) {
-    address_ = parameter.as_string();
-  } else {
-    address_ = "0.0.0.0";
-  }
+  private_nh->declare_parameter("verbose", true);
+  __verbose = private_nh->get_parameter("verbose").as_bool();
 
-  int server_threads;
-  if (private_nh->get_parameter("server_threads", parameter)) {
-    server_threads = parameter.as_int();
-  } else {
-    server_threads = 1;
-  }
+  private_nh->declare_parameter("address", "0.0.0.0");
+  address_ = private_nh->get_parameter("address").as_string();
 
-  if (private_nh->get_parameter("ros_threads", parameter)) {
-    ros_threads_ = parameter.as_int();
-  } else {
-    ros_threads_ = 2;
-  }
-  if (private_nh->get_parameter("publish_rate", parameter)) {
-    publish_rate_ = parameter.as_double();
-  } else {
-    publish_rate_ = -1.0;
-  }
+  private_nh->declare_parameter("server_threads", 1);
+  int server_threads = private_nh->get_parameter("server_threads").as_int();
 
-  if (private_nh->get_parameter("default_stream_type", parameter)) {
-    __default_stream_type = parameter.as_string();
-  } else {
-    __default_stream_type = "mjpeg";
-  }
+  private_nh->declare_parameter("ros_threads", 2);
+  ros_threads_ = private_nh->get_parameter("ros_threads").as_int();
+
+  private_nh->declare_parameter("publish_rate", -1.0);
+  publish_rate_ = private_nh->get_parameter("publish_rate").as_double();
+
+  private_nh->declare_parameter("default_stream_type", "mjpeg");
+  __default_stream_type = private_nh->get_parameter("default_stream_type").as_string();
 
   stream_types_["mjpeg"] = boost::shared_ptr<ImageStreamerType>(new MjpegStreamerType());
   stream_types_["png"] = boost::shared_ptr<ImageStreamerType>(new PngStreamerType());
@@ -298,11 +277,11 @@ bool WebVideoServer::handle_list_streams(const async_web_server_cpp::HttpRequest
     auto & topic_type = topic_and_types.second[0];  // explicitly take the first
     // TODO debugging
     fprintf(stderr, "topic_type: %s\n", topic_type.c_str());
-    if (topic_type == "sensor_msgs/Image")
+    if (topic_type == "sensor_msgs/msg/Image")
     {
       image_topics.push_back(topic_name);
     }
-    else if (topic_type == "sensor_msgs/CameraInfo")
+    else if (topic_type == "sensor_msgs/msg/CameraInfo")
     {
       camera_info_topics.push_back(topic_name);
     }
