@@ -114,7 +114,7 @@ void WebVideoServer::spin()
 {
   server_->run();
   RCLCPP_INFO(nh_->get_logger(), "Waiting For connections on %s:%d", address_.c_str(), port_);
-  rclcpp::executors::MultiThreadedExecutor spinner(rclcpp::executor::create_default_executor_arguments(), ros_threads_);
+  rclcpp::executors::MultiThreadedExecutor spinner(rclcpp::ExecutorOptions(), ros_threads_);
   spinner.add_node(nh_);
   if ( publish_rate_ > 0 ) {
     nh_->create_wall_timer(1s / publish_rate_, [this](){restreamFrames(1.0 / publish_rate_);});
